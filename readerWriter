@@ -1,0 +1,16 @@
+#include<unistd.h>
+#include<stdio.h>
+#include<pthread.h>
+#include<sys/types.h>
+
+
+pthread_mutex_t mutex,writer;
+int main(){
+
+pthread_init(&mutex,NULL);
+pthread_init(&writer,NULL);
+
+
+
+
+}
