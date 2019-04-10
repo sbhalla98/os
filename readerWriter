@@ -5,7 +5,7 @@
 
 
 pthread_mutex_t mutex,writeblock,s;
-int data = 0,rcount = 0;
+int data = 0, rcount = 0;
 
 
 void *reader(void *arg)
@@ -30,7 +30,18 @@ void *reader(void *arg)
   pthread_mutex_unlock(&mutex);
 }
 
-
+void *writer(void *arg)
+{
+  int f;
+  f = ((int) arg);
+  pthread_mutex_lock(&writeblock);
+  int x=0;
+  x++;
+  data++;
+  printf("Data writen by the writer %d %d time is %d and number of readers are %d\n",f+1,x,data,rcount);
+  sleep(1);
+  pthread_mutex_unlock(&writeblock);
+}
 
 int main()
 {
