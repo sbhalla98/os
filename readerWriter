@@ -1,27 +1,72 @@
-#include<unistd.h>
 #include<stdio.h>
 #include<pthread.h>
-#include<sys/types.h>
+#include<semaphore.h>
+#include<unistd.h>
 
 
-pthread_mutex_t mutex,writer;
-int main(){
+pthread_mutex_t mutex,writeblock,s;
+int data = 0,rcount = 0;
 
-pthread_init(&mutex,NULL);
-pthread_init(&writer,NULL);
 
-for(i=0;i<5;i++)
-  {
-    pthread_create(&wtid[i],NULL,writer,(void *)i);
-    pthread_create(&rtid[i],NULL,reader,(void *)i);
+void *reader(void *arg)
+{
+  int f;
+  f = ((int) arg);
+  sleep(5);
+  pthread_mutex_lock(&mutex);
+  int y=0;
+  y++;
+  rcount = rcount + 1;
+  if(rcount==1)
+  pthread_mutex_lock(&writeblock);
+  pthread_mutex_unlock(&mutex);
+  printf("Data read by the reader %d %d times is %d and number of readers are: %d\n",f+1,y,data,rcount);
+  sleep(1);
+  pthread_mutex_lock(&mutex);
+  rcount = rcount - 1;
+  if(rcount==0)
+  sleep(1);
+  pthread_mutex_unlock(&writeblock);
+  pthread_mutex_unlock(&mutex);
+}
+
+void *writer(void *arg)
+{
+  int f;
+  f = ((int) arg);
+  pthread_mutex_lock(&writeblock);
+  int x=0;
+  x++;
+  data++;
+  printf("Data writen by the writer %d %d time is %d and number of readers are %d\n",f+1,x,data,rcount);
+  sleep(1);
+  pthread_mutex_unlock(&writeblock);
+}
+
+int main()
+{
+  int i,n; 
+  pthread_t rtid[5],wtid[5];
+  printf("enter no readers and writers\n");
+  scanf("%d",&n);
+  pthread_mutex_init(&mutex,NULL);
+  pthread_mutex_init(&writeblock,NULL);
+  if(n<0){
+    printf("INVALID INPUT!!!!!!\n");
   }
-  for(i=0;i<5;i++)
+  else{
+  for(i=0;i<n;i++)
+  {
+    pthread_create(&rtid[i],NULL,reader,(void *)i);
+    pthread_create(&wtid[i],NULL,writer,(void *)i);
+    //pthread_create(&rtid[i],NULL,reader,(void *)i);
+  }
+  for(i=0;i<n;i++)
   {
     pthread_join(wtid[i],NULL);
     pthread_join(rtid[i],NULL);
   }
+  }
 	printf("PROCESS FINISHED\n");
         return 0;
-
-
 }
